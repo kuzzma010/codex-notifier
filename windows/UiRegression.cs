@@ -27,6 +27,27 @@ static class UiRegression {
             File.WriteAllText(path,"broken");Check(!AppSettings.Load(path).SetupComplete,"corrupt settings fallback");
             changed.Theme="invalid";changed.Size="invalid";changed.DelaySeconds=-2;changed.Normalize();Check(changed.Theme=="auto" && changed.Size=="small" && changed.DelaySeconds==30,"invalid settings normalized");
             changed.ReplyMode="send";changed.Save(path);Check(AppSettings.Load(path).ReplyMode=="send","reply mode persisted");
+            var editor=new TextBox {Text="Дальше"};
+            var editorWindow=new Window {Title="Notifier input verification",Width=260,Height=100,Content=editor};
+            try {
+                editorWindow.Show();editorWindow.Activate();editor.Focus();Pump();
+                var handle=new System.Windows.Interop.WindowInteropHelper(editorWindow).Handle;string reason;
+                Check(QuickReply.ComposerMatches(handle,"Дальше",out reason),"read actual focused editor without persisted draft");
+                Check(!QuickReply.ComposerMatches(handle,"Да",out reason),"reject mismatched editor text");
+                editor.Text="Дальше с изменением";Pump();
+                Check(!QuickReply.ComposerMatches(handle,"Дальше",out reason),"reject user-edited reply");
+                editor.Text="Дальше";editor.IsReadOnly=true;Pump();
+                Check(!QuickReply.ComposerMatches(handle,"Дальше",out reason),"reject read-only editor");
+                editor.IsReadOnly=false;
+                var other=new Window {Title="Other editor",Width=220,Height=100,Content=new TextBox {Text="Дальше"}};
+                try {
+                    other.Show();other.Activate();((TextBox)other.Content).Focus();Pump();
+                    Check(!QuickReply.ComposerMatches(handle,"Дальше",out reason),"reject matching text in different window of same process");
+                } finally {other.Close();}
+                editorWindow.Activate();editor.Focus();Pump();
+                editorWindow.WindowState=WindowState.Maximized;Pump();Native.FocusWindow(handle);Pump();
+                Check(editorWindow.WindowState==WindowState.Maximized,"opening visible maximized window preserves geometry");
+            } finally {editorWindow.Close();}
             string tid="11111111-2222-4333-8444-555555555555";
             Check(QuickReply.Link(tid,"Да")=="codex://threads/"+tid+"?prompt=%D0%94%D0%B0","reply targets exact task with encoded text");
             Check(QuickReply.DraftFromJson("{\"electron-persisted-atom-state\":{\"composer-prompt-drafts-v2\":{\"local:"+tid+"\":\"Да\"}}}",tid)=="Да","read target draft");
@@ -38,6 +59,8 @@ static class UiRegression {
                 Check(DesktopUi.Get<Button>(popup.Window,"ReplyYes").Content.ToString()=="Да" && DesktopUi.Get<Button>(popup.Window,"ReplyNext").Content.ToString()=="Дальше" && DesktopUi.Get<Button>(popup.Window,"ReplyDo").Content.ToString()=="Делай","three quick replies shown");
                 Click(popup.Window,"ReplyYes");Check(DesktopUi.Get<TextBlock>(popup.Window,"ReplyStatus").Text.Contains("Да"),"test reply does not send chat message");
                 popup.UpdateSeconds(15);Check(DesktopUi.Get<TextBlock>(popup.Window,"Countdown").Text.Contains("15"),"countdown update");
+                popup.StopCountdown();popup.UpdateSeconds(0);
+                Check(DesktopUi.Get<Border>(popup.Window,"Track").Visibility==Visibility.Collapsed && DesktopUi.Get<TextBlock>(popup.Window,"Countdown").Text.Contains("отменено"),"reply cancels countdown display");
                 Click(popup.Window,"Collapse");Check(!popup.Expanded,"collapse popup");
             }
             using(var popup=new Popup("По нажатию",delegate {},delegate {},new AppSettings {AutoOpen=false,Size="large",Theme="dark"})) {

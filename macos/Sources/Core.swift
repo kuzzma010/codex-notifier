@@ -19,7 +19,13 @@ struct Settings: Codable {
         FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/CodexNotifier/settings.json")
     }
     static func load(from url: URL = file) -> Settings {
-        guard let data = try? Data(contentsOf: url), var settings = try? JSONDecoder().decode(Settings.self, from: data) else { return Settings() }
+        guard let data = try? Data(contentsOf: url),
+              let saved = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+              let defaults = try? JSONEncoder().encode(Settings()),
+              var merged = (try? JSONSerialization.jsonObject(with: defaults)) as? [String: Any] else { return Settings() }
+        merged.merge(saved) { _, saved in saved }
+        guard let complete = try? JSONSerialization.data(withJSONObject: merged),
+              var settings = try? JSONDecoder().decode(Settings.self, from: complete) else { return Settings() }
         settings.normalize(); return settings
     }
     func save(to url: URL = file) throws {
@@ -65,7 +71,7 @@ final class EventDecoder {
         guard UUID(uuidString: thread) != nil else { return nil }
         let turn = (p["turn_id"] as? String) ?? ""
         if kind != "task_started" {
-            let key = "\(thread):\(turn):\(kind)"
+            let key = "\(thread):\(turn.isEmpty ? timestamp : turn):\(kind)"
             guard seen.insert(key).inserted else { return nil }
             order.append(key)
             if order.count > 2048 { seen.remove(order.removeFirst()) }

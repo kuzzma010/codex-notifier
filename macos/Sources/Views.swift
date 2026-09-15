@@ -21,6 +21,7 @@ struct NoticeCard: View {
     let open: () -> Void
     let acknowledge: () -> Void
     let reply: (String) -> Void
+    var replyEnabled = true
     @Environment(\.colorScheme) private var scheme
     private var accent: Color { scheme == .dark ? Color(red: 0.78, green: 0.90, blue: 0.84) : Color(red: 0.16, green: 0.37, blue: 0.28) }
     private var onAccent: Color { scheme == .dark ? .black : .white }
@@ -31,7 +32,8 @@ struct NoticeCard: View {
                     HStack { Label("Codex", systemImage: "checkmark").foregroundStyle(.secondary); Spacer(); Button(action: expand) { Image(systemName: "chevron.down") }.accessibilityLabel("Свернуть"); Button(action: acknowledge) { Image(systemName: "xmark") }.accessibilityLabel("Увидел") }.font(.system(size: 11))
                     Text("Ответ готов").font(.system(size: 19, weight: .medium))
                     Text(title).font(.system(size: 12)).foregroundStyle(.secondary).lineLimit(2).help(title)
-                    if settings.autoOpen {
+                    if !replyEnabled { Text("Автоматическое открытие отменено").font(.system(size: 11)).foregroundStyle(.secondary) }
+                    else if settings.autoOpen {
                         Text(seconds > 0 ? "До открытия чата: \(seconds) сек." : "Codex открыт · нажми «Увидел»").font(.system(size: 11)).foregroundStyle(.secondary)
                         ProgressView(value: Double(max(0, seconds)), total: Double(settings.delay)).tint(accent)
                     } else { Text("Открытие по нажатию").font(.system(size: 11)).foregroundStyle(.secondary) }
@@ -40,7 +42,7 @@ struct NoticeCard: View {
                         Button(action: acknowledge) { Text("Увидел").frame(maxWidth: .infinity).padding(.vertical, 7).background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 8)) }
                     }.font(.system(size: 12))
                     Text(settings.replyMode == "send" ? "Быстрый ответ · отправить сразу" : "Быстрый ответ · вставить для проверки").font(.system(size: 10)).foregroundStyle(.secondary)
-                    HStack { ForEach(ReplyData.texts, id: \.self) { text in Button(action: { reply(text) }) { Text(text).font(.system(size: 12)).frame(maxWidth: .infinity).padding(.vertical, 6).background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 8)) } } }
+                    HStack { ForEach(ReplyData.texts, id: \.self) { text in Button(action: { reply(text) }) { Text(text).font(.system(size: 12)).frame(maxWidth: .infinity).padding(.vertical, 6).background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 8)) } } }.disabled(!replyEnabled)
                     if !status.isEmpty { Text(status).font(.system(size: 11)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true) }
                 }.padding(18).frame(width: 308)
             } else {
@@ -61,7 +63,7 @@ struct NotificationView: View {
             NoticeCard(title: notice.title, settings: controller.displaySettings, expanded: controller.expanded,
                        seconds: controller.seconds, status: controller.replyStatus,
                        expand: { controller.toggleExpanded() }, open: { controller.openCurrent() },
-                       acknowledge: { controller.acknowledge() }, reply: { controller.reply($0) })
+                       acknowledge: { controller.acknowledge() }, reply: { controller.reply($0) }, replyEnabled: !controller.replyInProgress)
         }
     }
 }
@@ -95,10 +97,8 @@ struct SettingsView: View {
                     }
                     Section("Быстрые ответы") {
                         Picker("Режим", selection: $draft.replyMode) { Text("Вставлять для проверки").tag("draft"); Text("Отправлять сразу").tag("send") }
-                        if draft.replyMode == "send" {
-                            Button("Разрешить управление Codex…") { ReplySender.requestAccessibility() }
-                            Text("Для отправки macOS требует разрешение в разделе «Универсальный доступ».").font(.caption).foregroundStyle(.secondary)
-                        }
+                        Button("Разрешить управление Codex…") { ReplySender.requestAccessibility() }
+                        Text("Для вставки и отправки macOS требует разрешение в разделе «Универсальный доступ».").font(.caption).foregroundStyle(.secondary)
                     }
                     Section("Запуск") { Toggle("Запускать при входе в macOS", isOn: $draft.startup) }
                 }.formStyle(.grouped).frame(width: 352)

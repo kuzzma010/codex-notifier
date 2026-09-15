@@ -40,6 +40,7 @@ sealed class Popup : IDisposable {
     bool expanded;
     bool dark;
     bool disposing;
+    bool countdownStopped;
     int lastSeconds=Int32.MinValue;
     DateTime nextThemeCheck=DateTime.MinValue;
     public Popup(string title,Action open,Action ack,AppSettings options,Action<string> reply=null) {
@@ -70,7 +71,7 @@ sealed class Popup : IDisposable {
         DesktopUi.Get<Grid>(window,"Detail").Visibility=value?Visibility.Visible:Visibility.Collapsed;
         DesktopUi.Get<Border>(window,"Shell").Padding=new Thickness(value?18:6);
         DesktopUi.Get<Border>(window,"Shell").CornerRadius=new CornerRadius(value?22:16);
-        window.Width=value?320:168; window.Height=value?350:64; Position();
+        window.Width=value?320:168; window.Height=value?(String.IsNullOrEmpty(DesktopUi.Get<TextBlock>(window,"ReplyStatus").Text)?350:385):64; Position();
     }
     void Position() { Rect r=SystemParameters.WorkArea; window.Left=r.Right-window.Width-14; window.Top=r.Bottom-window.Height-14; }
     public void Show() { window.Show(); }
@@ -81,12 +82,14 @@ sealed class Popup : IDisposable {
     }
     public void UpdateSeconds(int n) {
         if(DateTime.UtcNow>=nextThemeCheck) {nextThemeCheck=DateTime.UtcNow.AddSeconds(2);bool nextDark=settings.IsDark();if(dark!=nextDark) {dark=nextDark;DesktopUi.ApplyTheme(window,settings);} }
+        if(countdownStopped)return;
         if(lastSeconds==n)return;lastSeconds=n;
         string text=!settings.AutoOpen?"Открытие по нажатию":n>0?"До открытия чата: "+n+" сек.":"Codex открыт · нажми «Увидел»";
         DesktopUi.Get<TextBlock>(window,"Countdown").Text=text;
         DesktopUi.Get<Border>(window,"Track").Visibility=settings.AutoOpen?Visibility.Visible:Visibility.Collapsed;
         DesktopUi.Get<Border>(window,"Progress").Width=270*Math.Max(0,Math.Min(1,(double)n/settings.DelaySeconds));
     }
+    public void StopCountdown() {countdownStopped=true;DesktopUi.Get<TextBlock>(window,"Countdown").Text="Автоматическое открытие отменено";DesktopUi.Get<Border>(window,"Track").Visibility=Visibility.Collapsed;}
     public void Dispose() { disposing=true; window.Close(); }
 }
 

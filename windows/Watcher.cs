@@ -58,12 +58,13 @@ public sealed class SessionWatcher : IDisposable {
             // Decode complete byte lines only, so a split UTF-8 character is not corrupted.
             using (MemoryStream line = new MemoryStream()) {
                 long safe = c.Offset;
+                bool oversized=false;
                 int b;
                 while ((b = f.ReadByte()) != -1) {
                     if (b == 10) {
                         string value = Encoding.UTF8.GetString(line.ToArray());
-                        ProcessLine(file, value); line.SetLength(0); safe = f.Position;
-                    } else { if(line.Length<1048576)line.WriteByte((byte)b); }
+                        if(!oversized)ProcessLine(file, value); line.SetLength(0); oversized=false; safe = f.Position;
+                    } else { if(line.Length<1048576)line.WriteByte((byte)b);else oversized=true; }
                 }
                 c.Offset = safe;
             }
@@ -97,7 +98,7 @@ public sealed class SessionWatcher : IDisposable {
             Guid id;
             if (!Guid.TryParse(thread, out id)) return;
             if (kind != "task_started") {
-                string key=thread+":"+turn+":"+kind;if(!completed.Add(key))return;
+                string key=thread+":"+(turn.Length>0?turn:Value(row,"timestamp"))+":"+kind;if(!completed.Add(key))return;
                 completionOrder.Enqueue(key);if(completionOrder.Count>2048)completed.Remove(completionOrder.Dequeue());
             }
             if (OnEvent != null) OnEvent(kind, thread, turn);

@@ -29,7 +29,7 @@ final class AppController: NSObject, ObservableObject, NSApplicationDelegate, NS
     private var pauseItem: NSMenuItem?
     private var testOptions: Settings?
     private var sender = ReplySender()
-    private var replyInProgress = false
+    @Published var replyInProgress = false
     var displaySettings: Settings { testOptions ?? settings }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -149,13 +149,14 @@ final class AppController: NSObject, ObservableObject, NSApplicationDelegate, NS
             panel.setFrame(NSRect(x: frame.maxX - size.width - 18, y: frame.minY + 18, width: size.width, height: size.height), display: true)
         }
     }
-    private func navigate(_ thread: String) {
-        guard let url = ReplyData.link(thread: thread) else { return }
-        if !NSWorkspace.shared.open(url) { replyStatus = "Не удалось открыть Codex."; expanded = true; resizePanel() }
+    @discardableResult private func navigate(_ thread: String) -> Bool {
+        guard let url = ReplyData.link(thread: thread) else { return false }
+        if !NSWorkspace.shared.open(url) { replyStatus = "Не удалось открыть Codex."; expanded = true; resizePanel(); return false }
+        return true
     }
     func openCurrent() {
         guard let notice = current else { return }
-        if let thread = notice.thread { navigate(thread); acknowledge() }
+        if let thread = notice.thread { if navigate(thread) { acknowledge() } }
         else { replyStatus = "Открыть чат · демонстрация"; expanded = true; resizePanel() }
     }
     private func dismiss() {

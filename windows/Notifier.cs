@@ -56,8 +56,9 @@ sealed class Notifier : ApplicationContext {
     DateTime lastPoll = DateTime.MinValue;
     DateTime retryRaise = DateTime.MaxValue;
     string lastThread;
-    sealed class PendingReply {public string Thread,Text;public uint Input;public DateTime Started,Deadline;public bool Sent;}
-    PendingReply pendingReply;
+    sealed class PendingReply {public string Thread,Text,Stage="waiting-draft";public uint Input;public DateTime Started,Deadline;public bool Sent;}
+    PendingReply replyState;
+    PendingReply pendingReply {get{return replyState;}set{replyState=value;if(value==null)QuickReply.StopInputWatch();}}
     public Notifier(bool demo) {
         Directory.CreateDirectory(logDir);
         settings=AppSettings.Load(AppSettings.SettingsPath);
@@ -95,7 +96,7 @@ sealed class Notifier : ApplicationContext {
         settingsDialog.Window.Closed+=delegate {settingsDialog=null;if(queue.Count>0 && !paused)ShowNext();};
         settingsDialog.Show();
     }
-    void Log(string s) { try { File.AppendAllText(Path.Combine(logDir,"events.log"), DateTime.Now.ToString("s")+" "+s+Environment.NewLine); } catch {} }
+    void Log(string s) { try {string path=Path.Combine(logDir,"events.log");if(File.Exists(path) && new FileInfo(path).Length>1048576) {File.Copy(path,path+".previous",true);File.WriteAllText(path,"");} File.AppendAllText(path, DateTime.Now.ToString("s")+" "+s+Environment.NewLine); } catch {} }
     string Title(string id) {
         try {
             string result="Задача " + id.Substring(0,8);
@@ -106,7 +107,7 @@ sealed class Notifier : ApplicationContext {
             return result;
         } catch { return "Ответ в Codex готов"; }
     }
-    void Add(string thread,string turn,string title) { queue.Add(new Notice {Thread=thread,Turn=turn,Title=title}); Log("notification-queued"); if(queue.Count==1 && settingsDialog==null) ShowNext(); }
+    void Add(string thread,string turn,string title) { if(queue.Count>=200){queue.RemoveAt(1);Log("notification-queue-limit");} queue.Add(new Notice {Thread=thread,Turn=turn,Title=title}); Log("notification-queued"); if(queue.Count==1 && settingsDialog==null) ShowNext(); }
     void ShowNext() {
         if(queue.Count==0 || settingsDialog!=null) return;
         queue[0].Deadline=DateTime.UtcNow.AddSeconds(settings.DelaySeconds); escalated=false;
@@ -118,12 +119,14 @@ sealed class Notifier : ApplicationContext {
     void BeginQuickReply(string text) {
         if(queue.Count==0 || popup==null || pendingReply!=null)return;
         escalated=true;retryRaise=DateTime.MaxValue;
+        popup.StopCountdown();
         string thread=queue[0].Thread;
         if(thread.Length==0) {popup.SetReplyStatus("Тестовый ответ: «"+text+"». Сообщение не отправлено.",false);return;}
         try {
             string draft=QuickReply.Draft(thread);
             if(!String.IsNullOrWhiteSpace(draft)) {Open(thread);popup.SetReplyStatus("В чате уже есть черновик. Проверь его перед отправкой.",false);return;}
-            pendingReply=new PendingReply {Thread=thread,Text=text,Input=QuickReply.InputStamp(),Started=DateTime.UtcNow,Deadline=DateTime.UtcNow.AddSeconds(10)};
+            pendingReply=new PendingReply {Thread=thread,Text=text,Input=settings.ReplyMode=="send"?QuickReply.BeginInputWatch():0,Started=DateTime.UtcNow,Deadline=DateTime.UtcNow.AddSeconds(10)};
+            Log("quick-reply-begin mode="+settings.ReplyMode);
             popup.SetReplyStatus(settings.ReplyMode=="send"?"Открываю задачу и готовлю отправку…":"Открываю задачу и вставляю текст…",true);
             Process.Start(new ProcessStartInfo(QuickReply.Link(thread,text)){UseShellExecute=true});
         } catch(Exception e) {pendingReply=null;popup.SetReplyStatus("Не удалось подготовить ответ. Открой чат вручную.",false);Log("quick-reply-error "+e.GetType().Name);}
@@ -138,21 +141,28 @@ sealed class Notifier : ApplicationContext {
     void PollQuickReply() {
         var pending=pendingReply;if(pending==null || popup==null)return;
         if(DateTime.UtcNow>pending.Deadline) {
-            pendingReply=null;popup.SetReplyStatus(pending.Sent?"Не удалось подтвердить отправку. Проверь чат, прежде чем повторять.":"Не удалось подтвердить вставку. Проверь поле ввода в чате.",pending.Sent);Log("quick-reply-timeout");return;
+            pendingReply=null;popup.SetReplyStatus(pending.Sent?"Не удалось подтвердить отправку. Проверь чат, прежде чем повторять.":"Автоотправка не выполнена. Проверь текст и отправь вручную.",pending.Sent);Log("quick-reply-timeout stage="+pending.Stage);return;
         }
         if(pending.Sent)return;
         if(settings.ReplyMode=="send" && QuickReply.InputStamp()!=pending.Input) {
-            pendingReply=null;popup.SetReplyStatus("Отправка отменена из-за нового ввода. Проверь текст в чате.",false);return;
+            pendingReply=null;Log("quick-reply-cancelled user-input");popup.SetReplyStatus("Отправка отменена из-за нового ввода. Проверь текст в чате.",false);return;
         }
-        string draft;
-        try {draft=QuickReply.Draft(pending.Thread);}catch(IOException){return;}
-        if(draft!=pending.Text)return;
-        if(settings.ReplyMode=="draft") {pendingReply=null;Log("quick-reply-drafted");Acknowledge();return;}
+        if(settings.ReplyMode=="draft") {
+            string editorReason;IntPtr editorWindow=ForegroundCodex();
+            if(editorWindow!=IntPtr.Zero && QuickReply.ComposerMatches(editorWindow,pending.Text,out editorReason)) {pendingReply=null;Log("quick-reply-drafted");Acknowledge();return;}
+            string draft;
+            try {draft=QuickReply.Draft(pending.Thread);}catch(IOException){ReplyStage(pending,"draft-file-busy");return;}
+            if(draft!=pending.Text){ReplyStage(pending,String.IsNullOrEmpty(draft)?"draft-empty":"draft-different");return;}
+            pendingReply=null;Log("quick-reply-drafted");Acknowledge();return;
+        }
         if((DateTime.UtcNow-pending.Started).TotalSeconds<1)return;
         IntPtr hwnd=ForegroundCodex();
-        if(hwnd==IntPtr.Zero)return;
-        if(QuickReply.SubmitToFocusedComposer(hwnd,pending.Input)) {pending.Sent=true;pending.Deadline=DateTime.UtcNow.AddSeconds(10);popup.SetReplyStatus("Ожидаю подтверждения отправки…",true);Log("quick-reply-submit-requested");}
+        if(hwnd==IntPtr.Zero){ReplyStage(pending,"codex-not-foreground");return;}
+        string reason;
+        if(QuickReply.SubmitToFocusedComposer(hwnd,pending.Input,pending.Text,out reason)) {QuickReply.StopInputWatch();pending.Sent=true;pending.Deadline=DateTime.UtcNow.AddSeconds(10);popup.SetReplyStatus("Ожидаю подтверждения отправки…",true);Log("quick-reply-submit-requested");}
+        ReplyStage(pending,reason);
     }
+    void ReplyStage(PendingReply pending,string stage) {if(pending.Stage==stage)return;pending.Stage=stage;Log("quick-reply-stage "+stage);}
     void Acknowledge() { ClosePopup(); if(queue.Count>0) queue.RemoveAt(0); Log("acknowledged"); ShowNext(); }
     void Clear() { ClosePopup(); queue.Clear(); retryRaise=DateTime.MaxValue; }
     void Cancel(string thread) {
@@ -160,13 +170,14 @@ sealed class Notifier : ApplicationContext {
         queue.RemoveAll(n=>n.Thread==thread);
         if(first) { ClosePopup(); ShowNext(); }
     }
-    void OpenCurrent() { if(queue.Count==0)return; Open(queue[0].Thread); Acknowledge(); }
-    void Open(string thread) {
+    void OpenCurrent() { if(queue.Count==0)return; if(Open(queue[0].Thread))Acknowledge();else if(popup!=null)popup.SetReplyStatus("Не удалось открыть чат. Уведомление сохранено.",false); }
+    bool Open(string thread) {
         try { if(thread.Length>0) Process.Start(new ProcessStartInfo("codex://threads/"+thread) {UseShellExecute=true}); }
-        catch(Exception e) { Log("deep-link-error "+e.GetType().Name); }
+        catch(Exception e) { Log("deep-link-error "+e.GetType().Name);return false; }
         lastThread=thread;
         bool raised=Native.Raise(); Log("raise requested; foreground="+raised);
         retryRaise=DateTime.UtcNow.AddSeconds(2);
+        return true;
     }
     void Tick(object sender,EventArgs e) {
         try {

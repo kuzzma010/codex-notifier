@@ -14,7 +14,7 @@ SDK="$(xcrun --sdk macosx --show-sdk-path)"
 mkdir -p build/arm64 build/x86_64
 SOURCES=(Sources/*.swift)
 for ARCH in arm64 x86_64; do
-  echo "Сборка для $ARCH…"
+  echo "Сборка для ${ARCH}…"
   xcrun swiftc -swift-version 5 -O -whole-module-optimization \
     -sdk "$SDK" -target "$ARCH-apple-macosx13.0" \
     -framework AppKit -framework SwiftUI -framework CoreServices \

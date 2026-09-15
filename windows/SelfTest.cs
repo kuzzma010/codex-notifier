@@ -5,12 +5,14 @@ using System.Collections.Generic;
 using System.Threading;
 
 static class SelfTest {
-    static void Check(bool value,string name) { if(!value)throw new Exception(name); }
+    static int checks;
+    static void Check(bool value,string name) { if(!value)throw new Exception(name);checks++; }
     static void Poll(SessionWatcher watcher) {Thread.Sleep(60);watcher.Poll();}
     static string Row(string kind,string turn,DateTime time) {
         return "{\"timestamp\":\""+time.ToString("o")+"\",\"type\":\"event_msg\",\"payload\":{\"type\":\""+kind+"\",\"turn_id\":\""+turn+"\"}}\n";
     }
     public static void Run() {
+        checks=0;
         string root=Path.Combine(Path.GetTempPath(),"CodexNotifier-test-"+Guid.NewGuid());
         Directory.CreateDirectory(root);
         SessionWatcher w=null;
@@ -43,7 +45,18 @@ static class SelfTest {
             int errors=0;w.OnError=error=>errors++;
             w.ProcessLine(file,"{\"timestamp\":\""+now.ToString("o")+"\",\"type\":\"response_item\",\"payload\":BROKEN "+new string('x',1000000));
             Check(errors==0,"irrelevant large payload is not deserialized");
-            File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"test-result.txt"),"PASS: 11 event-reader checks\r\n");
+            int before=seen.Count;
+            string padded=Row("task_complete","oversized",now).TrimEnd('\n');
+            File.AppendAllText(file,padded+new string(' ',1048576)+"INVALID\n");Poll(w);
+            Check(seen.Count==before,"oversized record must be skipped, not truncated to valid JSON");
+            w.ProcessLine(file,Row("task_complete","",now));
+            w.ProcessLine(file,Row("task_complete","",now.AddSeconds(1)));
+            Check(seen.Count==before+2,"missing turn IDs must not collapse distinct events");
+            Check(!QuickReply.CancelsReply(0x0200),"moving mouse after quick reply must not cancel send");
+            Check(!QuickReply.CancelsReply(0x0202) && !QuickReply.CancelsReply(0x0101),"releasing initiating button or key must not cancel send");
+            foreach(int message in new[]{0x0100,0x0104,0x0201,0x0204,0x0207,0x020B,0x020A,0x020E})Check(QuickReply.CancelsReply(message),"new key/click/scroll must cancel send");
+            QuickReply.BeginInputWatch();QuickReply.StopInputWatch();QuickReply.StopInputWatch();
+            File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"test-result.txt"),"PASS: "+checks+" core checks; native hook installation and cleanup\r\n");
         } catch(Exception e) { File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"test-result.txt"),"FAIL: "+e); Environment.ExitCode=1; }
         finally {if(w!=null)w.Dispose(); Directory.Delete(root,true); }
     }
