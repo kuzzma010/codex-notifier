@@ -1,5 +1,9 @@
 # macOS — English edition
 
+Latest changes: notifications hide after 15 seconds while automatic task opening keeps its own timer. The expanded card has tighter spacing with unchanged text and button sizes. The application icon is included in the build.
+
+To update, quit the running edition, rebuild, and replace the previous app with the result from `build`. Existing settings are stored separately and retained. Recheck Accessibility permission after replacing the app if you use quick replies.
+
 Requires macOS 13 or newer, Xcode, and its command-line tools.
 
 ## Build and run
