@@ -64,12 +64,18 @@ sealed class Notifier : ApplicationContext {
         settings=AppSettings.Load(AppSettings.SettingsPath);
         settings.Startup=AppSettings.StartupEnabled();
         tray = new NotifyIcon { Icon=Icon.ExtractAssociatedIcon(Application.ExecutablePath), Text="Codex Notifier — включён", Visible=true };
-        ContextMenuStrip menu = new ContextMenuStrip();
+        ContextMenuStrip menu = new ContextMenuStrip {
+            Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point),
+            ShowImageMargin = false,
+            ShowCheckMargin = true,
+            Padding = new Padding(6)
+        };
         menu.Items.Add("Настройки…", null, delegate { ShowSettings(); });
         menu.Items.Add("Показать уведомление", null, delegate { if (popup != null) popup.Show(); });
         menu.Items.Add("Проверить уведомление", null, delegate { Add("", "demo-"+DateTime.UtcNow.Ticks, "Проверка уведомления — откроется окно Codex"); });
         pause = new ToolStripMenuItem("Пауза", null, delegate { paused=!paused; pause.Checked=paused; tray.Text=paused ? "Codex Notifier — пауза" : "Codex Notifier — включён"; if(paused) Clear(); }); menu.Items.Add(pause);
         menu.Items.Add("Выход", null, delegate { ExitThread(); }); tray.ContextMenuStrip=menu;
+        foreach(ToolStripItem item in menu.Items) item.Padding = new Padding(10, 8, 16, 8);
         tray.DoubleClick += delegate { ShowSettings(); };
         watcher = new SessionWatcher(Path.Combine(home,"sessions"));
         watcher.OnError = delegate(string error) { Log("parse-error " + error); };
