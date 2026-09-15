@@ -39,6 +39,7 @@ static class DesktopUi {
 
 sealed class Popup : IDisposable {
     readonly Window window;
+    readonly DispatcherTimer hideTimer;
     readonly AppSettings settings;
     bool expanded;
     bool dark;
@@ -49,6 +50,8 @@ sealed class Popup : IDisposable {
     public Popup(string title,Action open,Action ack,AppSettings options,Action<string> reply=null) {
         settings=options.Copy(); dark=settings.IsDark();
         window=(Window)DesktopUi.Load("Notice.xaml"); DesktopUi.Initialize(window,settings);
+        hideTimer=new DispatcherTimer {Interval=TimeSpan.FromSeconds(15)};
+        hideTimer.Tick+=delegate {hideTimer.Stop();window.Hide();};
         DesktopUi.Get<TextBlock>(window,"TaskTitle").Text=title;
         DesktopUi.Get<TextBlock>(window,"TaskTitle").ToolTip=title;
         DesktopUi.Get<Button>(window,"MiniOpen").Click+=delegate { open(); };
@@ -80,7 +83,7 @@ sealed class Popup : IDisposable {
         Position();
     }
     void Position() { Rect r=SystemParameters.WorkArea;double height=window.ActualHeight>0?window.ActualHeight:64; window.Left=r.Right-window.Width-14; window.Top=r.Bottom-height-14; }
-    public void Show() { window.Show(); }
+    public void Show() { window.Show(); hideTimer.Stop(); hideTimer.Start(); }
     public void SetReplyStatus(string text,bool busy) {
         var status=DesktopUi.Get<TextBlock>(window,"ReplyStatus");status.Text=text;status.Visibility=String.IsNullOrEmpty(text)?Visibility.Collapsed:Visibility.Visible;
         SetExpanded(true);
@@ -97,7 +100,7 @@ sealed class Popup : IDisposable {
         DesktopUi.Get<Border>(window,"Progress").Width=270*Math.Max(0,Math.Min(1,(double)n/settings.DelaySeconds));
     }
     public void StopCountdown() {countdownStopped=true;DesktopUi.Get<TextBlock>(window,"Countdown").Text="Automatic opening cancelled";DesktopUi.Get<Border>(window,"Track").Visibility=Visibility.Collapsed;}
-    public void Dispose() { disposing=true; window.Close(); }
+    public void Dispose() { disposing=true; hideTimer.Stop(); window.Close(); }
 }
 
 sealed class SettingsDialog {

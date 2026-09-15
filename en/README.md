@@ -15,6 +15,7 @@ This folder contains the English application sources for both platforms. The Rus
 
 ## Features
 
+- The notification hides after 15 seconds. The configured automatic task-opening timer continues independently.
 - A small notification with **Open** and **⋯**, or an expanded card with the task title and actions.
 - Light, dark, or system appearance; a custom tray/menu bar icon.
 - Optional sound and automatic task opening after 15, 30, or 60 seconds.

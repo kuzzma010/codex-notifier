@@ -24,6 +24,7 @@ final class AppController: NSObject, ObservableObject, NSApplicationDelegate, NS
     private var panel: NoticePanel?
     private var queue: [PendingNotice] = []
     private var countdown: Timer?
+    private var hideTimer: Timer?
     private var deadline = Date()
     private var paused = false
     private var pauseItem: NSMenuItem?
@@ -49,7 +50,7 @@ final class AppController: NSObject, ObservableObject, NSApplicationDelegate, NS
         if !settings.setupComplete { showSettings() }
     }
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool { showSettings(); return true }
-    func applicationWillTerminate(_ notification: Notification) { monitor?.stop(); countdown?.invalidate(); sender.cancel() }
+    func applicationWillTerminate(_ notification: Notification) { monitor?.stop(); countdown?.invalidate(); hideTimer?.invalidate(); sender.cancel() }
     @objc func quitApp() { NSApp.terminate(nil) }
     @objc func togglePause() {
         paused.toggle(); pauseItem?.state = paused ? .on : .off
@@ -126,6 +127,10 @@ final class AppController: NSObject, ObservableObject, NSApplicationDelegate, NS
         panel.appearance = displaySettings.theme == "auto" ? nil : NSAppearance(named: displaySettings.theme == "dark" ? .darkAqua : .aqua)
         panel.contentView = NSHostingView(rootView: NotificationView(controller: self)); self.panel = panel
         resizePanel(); panel.orderFrontRegardless()
+        hideTimer = Timer.scheduledTimer(withTimeInterval: 15, repeats: false) { [weak self] _ in
+            self?.panel?.orderOut(nil)
+            self?.hideTimer = nil
+        }
         if displaySettings.sound { NSSound(named: NSSound.Name("Glass"))?.play() }
         if displaySettings.autoOpen {
             countdown = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
@@ -160,6 +165,7 @@ final class AppController: NSObject, ObservableObject, NSApplicationDelegate, NS
         else { replyStatus = "Открыть чат · демонстрация"; expanded = true; resizePanel() }
     }
     private func dismiss() {
+        hideTimer?.invalidate(); hideTimer = nil
         sender.cancel(); replyInProgress = false; countdown?.invalidate(); countdown = nil
         panel?.orderOut(nil); panel?.contentView = nil; panel?.close(); panel = nil
         current = nil; testOptions = nil
