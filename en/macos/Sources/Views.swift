@@ -28,7 +28,7 @@ struct NoticeCard: View {
     var body: some View {
         Group {
             if expanded {
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 7) {
                     HStack { Label("Codex", systemImage: "checkmark").foregroundStyle(.secondary); Spacer(); Button(action: expand) { Image(systemName: "chevron.down") }.accessibilityLabel("Collapse"); Button(action: acknowledge) { Image(systemName: "xmark") }.accessibilityLabel("Got it") }.font(.system(size: 11))
                     Text("Reply ready").font(.system(size: 19, weight: .medium))
                     Text(title).font(.system(size: 12)).foregroundStyle(.secondary).lineLimit(2).help(title)
@@ -44,7 +44,7 @@ struct NoticeCard: View {
                     Text(settings.replyMode == "send" ? "Quick reply · send immediately" : "Quick reply · insert for review").font(.system(size: 10)).foregroundStyle(.secondary)
                     HStack { ForEach(ReplyData.texts, id: \.self) { text in Button(action: { reply(text) }) { Text(text).font(.system(size: 12)).frame(maxWidth: .infinity).padding(.vertical, 6).background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 8)) } } }.disabled(!replyEnabled)
                     if !status.isEmpty { Text(status).font(.system(size: 11)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true) }
-                }.padding(18).frame(width: 308)
+                }.padding(12).frame(width: 308)
             } else {
                 HStack(spacing: 4) {
                     Button(action: open) { Text("Open").font(.system(size: 12, weight: .medium)).frame(width: 96, height: 34).background(accent, in: RoundedRectangle(cornerRadius: 9)).foregroundColor(onAccent) }

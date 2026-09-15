@@ -67,6 +67,8 @@ static class UiRegression {
                 Click(popup.Window,"Collapse");Check(!popup.Expanded,"collapse popup");
             }
             using(var popup=new Popup("Manual",delegate {},delegate {},new AppSettings {AutoOpen=false,Size="large",Theme="dark"})) {
+                popup.Show();Pump();
+                Capture(popup.Window,Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"notification-dark.png"));
                 Check(DesktopUi.Get<Border>(popup.Window,"Track").Visibility==Visibility.Collapsed,"manual-only hides countdown track");
                 Check(DesktopUi.Get<TextBlock>(popup.Window,"Countdown").Text=="Open manually","manual-only copy");
             }

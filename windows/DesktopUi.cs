@@ -75,7 +75,7 @@ sealed class Popup : IDisposable {
         expanded=value;
         DesktopUi.Get<Grid>(window,"Mini").Visibility=value?Visibility.Collapsed:Visibility.Visible;
         DesktopUi.Get<Grid>(window,"Detail").Visibility=value?Visibility.Visible:Visibility.Collapsed;
-        DesktopUi.Get<Border>(window,"Shell").Padding=new Thickness(value?18:6);
+        DesktopUi.Get<Border>(window,"Shell").Padding=new Thickness(value?12:6);
         DesktopUi.Get<Border>(window,"Shell").CornerRadius=new CornerRadius(value?22:16);
         window.Width=value?320:168;
         window.SizeToContent=value?SizeToContent.Height:SizeToContent.Manual;
