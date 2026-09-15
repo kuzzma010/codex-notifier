@@ -63,7 +63,7 @@ sealed class Notifier : ApplicationContext {
         Directory.CreateDirectory(logDir);
         settings=AppSettings.Load(AppSettings.SettingsPath);
         settings.Startup=AppSettings.StartupEnabled();
-        tray = new NotifyIcon { Icon=SystemIcons.Information, Text="Codex Notifier — включён", Visible=true };
+        tray = new NotifyIcon { Icon=Icon.ExtractAssociatedIcon(Application.ExecutablePath), Text="Codex Notifier — включён", Visible=true };
         ContextMenuStrip menu = new ContextMenuStrip();
         menu.Items.Add("Настройки…", null, delegate { ShowSettings(); });
         menu.Items.Add("Показать уведомление", null, delegate { if (popup != null) popup.Show(); });
@@ -190,7 +190,7 @@ sealed class Notifier : ApplicationContext {
             if(settings.AutoOpen && left<=0 && !escalated) { escalated=true; Open(queue[0].Thread); Log("escalated-after-"+settings.DelaySeconds+"s"); }
         } catch(Exception error) { Log("error "+error.GetType().Name); }
     }
-    protected override void ExitThreadCore() { timer.Stop(); watcher.Dispose();paused=true; Clear(); if(settingsDialog!=null)settingsDialog.Window.Close(); tray.Visible=false; tray.Dispose(); Log("stopped"); base.ExitThreadCore(); }
+    protected override void ExitThreadCore() { timer.Stop(); watcher.Dispose();paused=true; Clear(); if(settingsDialog!=null)settingsDialog.Window.Close(); tray.Visible=false;var icon=tray.Icon; tray.Dispose();if(icon!=null)icon.Dispose(); Log("stopped"); base.ExitThreadCore(); }
 }
 
 static class Program {

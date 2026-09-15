@@ -32,7 +32,10 @@ static class UiRegression {
             try {
                 editorWindow.Show();editorWindow.Activate();editor.Focus();Pump();
                 var handle=new System.Windows.Interop.WindowInteropHelper(editorWindow).Handle;string reason;
-                Check(QuickReply.ComposerMatches(handle,"Дальше",out reason),"read actual focused editor without persisted draft");
+                Native.FocusWindow(handle);editor.Focus();Pump();
+                bool editorReady=false;
+                for(int attempt=0;attempt<10;attempt++){System.Threading.Thread.Sleep(50);Pump();if(QuickReply.ComposerMatches(handle,"Дальше",out reason)){editorReady=true;break;}}
+                Check(editorReady,"read actual focused editor without persisted draft");
                 Check(!QuickReply.ComposerMatches(handle,"Да",out reason),"reject mismatched editor text");
                 editor.Text="Дальше с изменением";Pump();
                 Check(!QuickReply.ComposerMatches(handle,"Дальше",out reason),"reject user-edited reply");

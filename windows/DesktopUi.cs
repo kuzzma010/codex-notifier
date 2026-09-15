@@ -13,6 +13,9 @@ static class DesktopUi {
     public static object Load(string name) { using(Stream s=Assembly.GetExecutingAssembly().GetManifestResourceStream(name)) { if(s==null)throw new IOException("Missing UI resource: "+name); return XamlReader.Load(s); } }
     public static T Get<T>(Window w,string name) where T:class { return w.FindName(name) as T; }
     public static void Initialize(Window w,AppSettings settings) {
+        using(Stream icon=Assembly.GetExecutingAssembly().GetManifestResourceStream("App.ico")) {
+            if(icon!=null)w.Icon=System.Windows.Media.Imaging.BitmapFrame.Create(icon,System.Windows.Media.Imaging.BitmapCreateOptions.None,System.Windows.Media.Imaging.BitmapCacheOption.OnLoad);
+        }
         // These are small, static windows; avoid loading a large GPU driver stack.
         RenderOptions.ProcessRenderMode=RenderMode.SoftwareOnly;
         w.Resources.MergedDictionaries.Add((ResourceDictionary)Load("UiTheme.xaml"));

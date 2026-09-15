@@ -1,8 +1,22 @@
 # Codex Notifier
 
+<img src="assets/icon.png" alt="Иконка Codex Notifier — сообщение с галочкой" width="96" />
+
 Лёгкое настольное приложение, которое напоминает о завершении ответа в **Codex** и помогает быстро вернуться к задаче. Нативные версии для Windows и macOS, без Electron и собственного сервера.
 
 > Companion for the Codex desktop app: completion alerts, quick replies, native Windows/macOS UI and system theme support.
+
+## Как выглядит
+
+Снимки интерфейса Windows. На macOS используется нативный интерфейс AppKit и SwiftUI с теми же настройками.
+
+### Тёмная тема и большая карточка
+
+![Настройки в тёмной теме и предпросмотр большой карточки с быстрыми ответами](assets/settings-dark.png)
+
+### Светлая тема и маленькая карточка
+
+![Настройки в светлой теме и компактная карточка «Открыть» с меню](assets/settings-light.png)
 
 ## Что умеет
 
