@@ -1,5 +1,7 @@
 # Codex Notifier
 
+**[English edition for Windows and macOS →](en/README.md)**
+
 <img src="assets/icon.png" alt="Иконка Codex Notifier — сообщение с галочкой" width="96" />
 
 Лёгкое настольное приложение, которое напоминает о завершении ответа в **Codex** и помогает быстро вернуться к задаче. Нативные версии для Windows и macOS, без Electron и собственного сервера.

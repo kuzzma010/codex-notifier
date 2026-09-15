@@ -1,0 +1,135 @@
+Узнавай, когда ответ готов — удобным для тебя способом.	Know when a reply is ready, your way.
+Настройки доступны через значок рядом с часами.	Open settings from the tray icon next to the clock.
+Настройки доступны через значок в строке меню.	Open settings from the menu bar icon.
+Да · Дальше · Делай — в большой карточке	Yes · Continue · Do it — in the expanded card
+В чате уже есть черновик. Проверь его перед отправкой.	This task already has a draft. Review it before sending.
+В чате уже есть черновик. Он не заменён.	This task already has a draft. It was not replaced.
+Не удалось подготовить ответ. Открой чат вручную.	Could not prepare the reply. Open the task manually.
+Не удалось подтвердить отправку. Проверь чат, прежде чем повторять.	Sending was not confirmed. Check the task before trying again.
+Автоотправка не выполнена. Проверь текст и отправь вручную.	Auto-send did not complete. Review the text and send manually.
+Отправка отменена из-за нового ввода. Проверь текст в чате.	Sending cancelled because of new input. Check the task draft.
+Не удалось открыть чат. Уведомление сохранено.	Could not open the task. The notification was kept.
+Не удалось определить задачу.	Could not identify the task.
+Неизвестный быстрый ответ.	Unknown quick reply.
+Не удалось проверить активность ввода.	Could not verify input activity.
+Не удалось сохранить настройки.	Could not save settings.
+Тест завершён. При обычном уведомлении откроется Codex.	Test finished. A real notification would open Codex.
+Тестовое уведомление показано возле часов.	Test notification shown near the clock.
+Уведомление скрыто · открытие отменено	Notification dismissed · opening cancelled
+Уведомление скрыто · демонстрация	Notification dismissed · preview
+Чат открыт · демонстрация	Task opened · preview
+Codex открыт · нажми «Увидел»	Codex opened · click Got it
+Автоматическое открытие отменено	Automatic opening cancelled
+Открытие по нажатию	Open manually
+Быстрый ответ · отправить сразу	Quick reply · send immediately
+Быстрый ответ · вставить для проверки	Quick reply · insert for review
+Проверка уведомления — откроется окно Codex	Notification test — opens Codex
+Проверка длинного названия задачи	A sample task with a longer title
+Открываю задачу и готовлю отправку…	Opening task and preparing to send…
+Открываю задачу и вставляю текст…	Opening task and inserting text…
+Ожидаю подтверждения отправки…	Waiting for sending confirmation…
+Приложение Codex не найдено. Открой чат вручную.	Codex was not found. Open the task manually.
+Не удалось проверить черновик. Открой чат вручную.	Could not check the draft. Open the task manually.
+Открываю задачу и вставляю ответ…	Opening task and inserting reply…
+Не удалось открыть Codex.	Could not open Codex.
+Текст оставлен для проверки. Для автоотправки разреши управление в настройках универсального доступа.	Review the text manually. Allow Accessibility access to enable auto-send.
+Не удалось подтвердить ввод. Проверь чат перед повтором.	Could not confirm the text. Check the task before retrying.
+Ответ вставлен для проверки.	Reply inserted for review.
+Фокус изменился. Ответ оставлен для проверки.	Focus changed. Review the reply manually.
+Ввод изменился. Отправь сообщение вручную.	New input detected. Send the reply manually.
+Фокус или ввод изменился. Отправь сообщение вручную.	Focus or input changed. Send the reply manually.
+Отпусти клавиши-модификаторы и отправь сообщение вручную.	Release modifier keys and send the reply manually.
+Отправка запрошена. Ожидаю начала задачи…	Send requested. Waiting for the task to start…
+Отправка не подтверждена. Проверь чат перед повтором.	Sending was not confirmed. Check the task before retrying.
+Начало задачи не подтверждено. Проверь чат перед повтором.	Task start was not confirmed. Check the task before retrying.
+Сначала запусти Codex и создай локальную задачу. Затем выбери «Подключиться заново» в меню.	Start Codex and create a local task, then select Reconnect in the menu.
+Не удалось подключить отслеживание файлов.	Could not connect the file monitor.
+Не удалось запустить отслеживание файлов.	Could not start the file monitor.
+Не удалось прочитать обновление журнала. Следующая запись будет проверена повторно.	Could not read the log update. The next write will be checked again.
+Подтверди автозапуск в Системных настройках → Основные → Объекты входа.	Approve login startup in System Settings → General → Login Items.
+Тест завершён. Настоящий чат не открыт.	Test finished. No real task was opened.
+Для вставки и отправки macOS требует разрешение в разделе «Универсальный доступ».	Inserting and sending replies requires Accessibility permission on macOS.
+Сборка требует macOS и Xcode.	Building requires macOS and Xcode.
+Открой Xcode, заверши настройку и выбери Command Line Tools в Xcode → Settings → Locations.	Open Xcode, finish setup and select Command Line Tools in Xcode → Settings → Locations.
+Готово. Перетащи Codex Notifier.app в Applications и запусти.	Done. Move Codex Notifier.app to Applications and launch it.
+Разрешить управление Codex…	Allow Accessibility access…
+Запускать при входе в macOS	Launch at login
+Запускать вместе с Windows	Launch with Windows
+Сохранить и начать	Save and start
+Открывать чат автоматически	Open task automatically
+Если уведомление осталось без ответа	If the notification has not been acknowledged
+Вставлять для проверки	Insert for review
+Отправлять сразу	Send immediately
+Визуальный стиль уведомлений	Notification appearance
+Развернуть большую карточку	Expand notification
+Развернуть уведомление	Expand notification
+Свернуть уведомление	Collapse notification
+Увидел: закрыть уведомление	Dismiss notification
+Развернуть превью	Expand preview
+Свернуть превью	Collapse preview
+Показать уведомление	Show notification
+Проверить уведомление	Test notification
+Проверка уведомления	Notification test
+Подключиться заново	Reconnect
+Настрой под себя	Make it yours
+Размер уведомления	Notification size
+Как на устройстве	Follow system
+Звуковой сигнал	Play a sound
+Изменения сразу видны здесь	Your changes appear here
+Настройки — Codex Notifier	Settings — Codex Notifier
+Codex ждёт тебя	Codex is waiting for you
+Ответ в Codex готов	Your Codex reply is ready
+Тестовый ответ: «	Test reply: «
+». Сообщение не отправлено.	». No message was sent.
+ · демонстрация, сообщение не отправлено	 · preview, no message sent
+До открытия чата: 	Opening task in: 
+ сек.	 sec.
+ — выполнение остановлено	 — stopped
+ — остановлено	 — stopped
+БЫСТРЫЕ ОТВЕТЫ	QUICK REPLIES
+ПЕРВЫЙ ЗАПУСК	FIRST RUN
+КОГДА ОТВЕТ ГОТОВ	WHEN A REPLY IS READY
+ВНЕШНИЙ ВИД	APPEARANCE
+ПРЕДПРОСМОТР	PREVIEW
+НАСТРОЙКИ	SETTINGS
+ЗАПУСК	STARTUP
+Быстрые ответы	Quick replies
+Когда ответ готов	When a reply is ready
+Внешний вид	Appearance
+Открыть чат	Open task
+Ответ готов	Reply ready
+Маленькая	Small
+Большая	Large
+Светлая	Light
+Тёмная	Dark
+Настройки	Settings
+Сохранить	Save
+Свернуть	Collapse
+Увидел	Got it
+Открыть	Open
+Пауза	Pause
+Выход	Quit
+включён	enabled
+пауза	paused
+Задача 	Task 
+По нажатию	Manual
+Тема	Theme
+Размер	Size
+Через	After
+Режим	Mode
+Запуск	Startup
+15 секунд	15 seconds
+30 секунд	30 seconds
+1 минуту	1 minute
+Проверка логики…	Checking core logic…
+Сборка для 	Building for 
+Тест: 	Test: 
+Отправить	Send
+Вставить	Insert
+ · демонстрация	 · preview
+Дальше с изменением	Continue with changes
+Дальше ещё	Continue with changes
+Дальше	Continue
+Делай	Do it
+Да	Yes
+отменено	cancelled
