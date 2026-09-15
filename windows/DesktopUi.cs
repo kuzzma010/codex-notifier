@@ -74,14 +74,18 @@ sealed class Popup : IDisposable {
         DesktopUi.Get<Grid>(window,"Detail").Visibility=value?Visibility.Visible:Visibility.Collapsed;
         DesktopUi.Get<Border>(window,"Shell").Padding=new Thickness(value?18:6);
         DesktopUi.Get<Border>(window,"Shell").CornerRadius=new CornerRadius(value?22:16);
-        window.Width=value?320:168; window.Height=value?(String.IsNullOrEmpty(DesktopUi.Get<TextBlock>(window,"ReplyStatus").Text)?350:385):64; Position();
+        window.Width=value?320:168;
+        window.SizeToContent=value?SizeToContent.Height:SizeToContent.Manual;
+        window.Height=value?Double.NaN:64;
+        Position();
     }
-    void Position() { Rect r=SystemParameters.WorkArea; window.Left=r.Right-window.Width-14; window.Top=r.Bottom-window.Height-14; }
+    void Position() { Rect r=SystemParameters.WorkArea;double height=window.ActualHeight>0?window.ActualHeight:64; window.Left=r.Right-window.Width-14; window.Top=r.Bottom-height-14; }
     public void Show() { window.Show(); }
     public void SetReplyStatus(string text,bool busy) {
-        SetExpanded(true); DesktopUi.Get<TextBlock>(window,"ReplyStatus").Text=text;
+        var status=DesktopUi.Get<TextBlock>(window,"ReplyStatus");status.Text=text;status.Visibility=String.IsNullOrEmpty(text)?Visibility.Collapsed:Visibility.Visible;
+        SetExpanded(true);
         foreach(string name in new[]{"ReplyYes","ReplyNext","ReplyDo"})DesktopUi.Get<Button>(window,name).IsEnabled=!busy;
-        window.Height=text.Length>0?385:350;Position();
+        Position();
     }
     public void UpdateSeconds(int n) {
         if(DateTime.UtcNow>=nextThemeCheck) {nextThemeCheck=DateTime.UtcNow.AddSeconds(2);bool nextDark=settings.IsDark();if(dark!=nextDark) {dark=nextDark;DesktopUi.ApplyTheme(window,settings);} }

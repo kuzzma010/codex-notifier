@@ -12,7 +12,7 @@
     <Border x:Name="Track" Grid.Row="4" Background="{DynamicResource Soft}" CornerRadius="2"><Border x:Name="Progress" Background="{DynamicResource Accent}" CornerRadius="2" HorizontalAlignment="Left"/></Border>
     <Grid Grid.Row="5" Margin="0,16,0,0"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions><Button x:Name="OpenChat" Content="Открыть чат" Style="{DynamicResource Primary}" Margin="0,0,4,0"/><Button x:Name="Seen" Content="Увидел" Grid.Column="1" Margin="4,0,0,0"/></Grid>
     <StackPanel x:Name="Replies" Grid.Row="6" Margin="0,13,0,0"><TextBlock x:Name="ReplyHint" FontSize="10" Foreground="{DynamicResource Muted}" Margin="0,0,0,6"/><UniformGrid Columns="3"><Button x:Name="ReplyYes" Content="Да" Padding="5,6" Margin="0,0,3,0"/><Button x:Name="ReplyNext" Content="Дальше" Padding="5,6" Margin="3,0,3,0"/><Button x:Name="ReplyDo" Content="Делай" Padding="5,6" Margin="3,0,0,0"/></UniformGrid></StackPanel>
-    <TextBlock x:Name="ReplyStatus" Grid.Row="7" FontSize="11" TextWrapping="Wrap" Foreground="{DynamicResource Muted}" Margin="0,8,0,0"/>
+    <TextBlock x:Name="ReplyStatus" Grid.Row="7" Visibility="Collapsed" FontSize="11" TextWrapping="Wrap" Foreground="{DynamicResource Muted}" Margin="0,8,0,0"/>
    </Grid>
   </Grid>
  </Border>
