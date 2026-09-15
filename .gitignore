@@ -1,0 +1,22 @@
+# Build products
+build/
+bin/
+obj/
+*.exe
+*.pdb
+*.app/
+*.zip
+test-result.txt
+
+# Local settings and editor files
+.DS_Store
+Thumbs.db
+.vs/
+.idea/
+*.xcuserstate
+xcuserdata/
+.env
+.env.*
+.codex/
+settings.json
+events.log
