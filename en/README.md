@@ -36,10 +36,10 @@ Actual English Windows settings; macOS uses native SwiftUI controls.
 
 The app watches new events in local `~/.codex/sessions` files and reads task names from Codex's local index. Previously completed responses are ignored at startup. Notifications are queued when several tasks finish. File change notifications and bounded queues keep background work small; no language model runs inside this utility.
 
-A quick reply opens the matching task. Immediate sending checks the active editor, expected text, and new user input before requesting submission. If verification fails, the app asks you to review the text and send manually. It does not automatically retry submission.
+Insert for review opens the task editor. Send immediately queues the message directly for the matching task through Codex CLI, without opening a window or editing a draft. A successful queue request confirms acceptance, not completion of the response. An uncertain result is never retried automatically.
 
 ## Scope and limitations
 
-This is an independent companion for **Codex desktop local tasks**. It does not monitor general ChatGPT web/cloud conversations or permission requests in the middle of a task. It detects completed responses, whether or not they ask a question. Codex updates can change log formats, deep links, or editor accessibility. macOS quick replies require Accessibility permission.
+This is an independent companion for **Codex desktop local tasks**. It does not monitor general ChatGPT web/cloud conversations or permission requests in the middle of a task. It detects completed responses, whether or not they ask a question. Codex updates can change log formats, deep links, or editor accessibility. macOS draft insertion requires Accessibility permission; background sending does not.
 
 The English Windows edition passes 27 core checks and 28 UI checks. See platform instructions for repeatable verification. macOS requires a native Mac build; its build script compiles both Apple Silicon and Intel executables and runs core checks.
