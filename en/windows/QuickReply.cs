@@ -9,6 +9,32 @@ using System.Windows.Automation;
 
 static class QuickReply {
     public static readonly string[] Texts={"Yes","Continue","Do it"};
+    public static string QueueArguments(string thread,string text) {
+        Guid id;if(!Guid.TryParse(thread,out id) || Array.IndexOf(Texts,text)<0)throw new ArgumentException("Invalid quick reply");
+        return "queue --thread "+id+" --message \""+text+"\"";
+    }
+    public static string CliPath() {
+        string root=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"OpenAI","Codex","bin");
+        if(Directory.Exists(root)) {
+            var dirs=new DirectoryInfo(root).GetDirectories();
+            Array.Sort(dirs,delegate(DirectoryInfo a,DirectoryInfo b){return b.LastWriteTimeUtc.CompareTo(a.LastWriteTimeUtc);});
+            foreach(var dir in dirs) {string file=Path.Combine(dir.FullName,"codex.exe");if(File.Exists(file))return file;}
+        }
+        foreach(string dir in (Environment.GetEnvironmentVariable("PATH")??"").Split(Path.PathSeparator)) {
+            if(String.IsNullOrWhiteSpace(dir))continue;
+            string file=Path.Combine(dir.Trim('"'),"codex.exe");if(File.Exists(file))return file;
+        }
+        throw new FileNotFoundException("Codex CLI not found");
+    }
+    public static bool Queue(string thread,string text) {
+        var info=new ProcessStartInfo(CliPath(),QueueArguments(thread,text)) {UseShellExecute=false,CreateNoWindow=true,WindowStyle=ProcessWindowStyle.Hidden,RedirectStandardOutput=true,RedirectStandardError=true};
+        using(var process=new Process {StartInfo=info}) {
+            process.OutputDataReceived+=delegate {};process.ErrorDataReceived+=delegate {};
+            process.Start();process.BeginOutputReadLine();process.BeginErrorReadLine();
+            if(!process.WaitForExit(20000)) {try{process.Kill();}catch{}return false;}
+            return process.ExitCode==0;
+        }
+    }
     static string StatePath { get {return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),".codex",".codex-global-state.json");} }
     public static string Link(string thread,string text) {
         Guid id;if(!Guid.TryParse(thread,out id))throw new ArgumentException("Could not identify the task.");

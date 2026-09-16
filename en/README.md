@@ -1,5 +1,7 @@
 # Codex Notifier — English edition
 
+**Background quick replies:** Send immediately now uses `codex queue`, without showing the app or changing its draft. Requires a Codex CLI version with the `queue` command. Failure never opens the app or retries automatically. Insert for review still opens the editor. Disable automatic opening to open tasks only with the Open button.
+
 [Русская версия](../README.md)
 
 <img src="../assets/icon.png" alt="Codex Notifier icon" width="96" />
@@ -40,4 +42,4 @@ A quick reply opens the matching task. Immediate sending checks the active edito
 
 This is an independent companion for **Codex desktop local tasks**. It does not monitor general ChatGPT web/cloud conversations or permission requests in the middle of a task. It detects completed responses, whether or not they ask a question. Codex updates can change log formats, deep links, or editor accessibility. macOS quick replies require Accessibility permission.
 
-The English Windows edition passes 24 core checks and 28 UI checks. See platform instructions for repeatable verification. macOS requires a native Mac build; its build script compiles both Apple Silicon and Intel executables and runs core checks.
+The English Windows edition passes 27 core checks and 28 UI checks. See platform instructions for repeatable verification. macOS requires a native Mac build; its build script compiles both Apple Silicon and Intel executables and runs core checks.

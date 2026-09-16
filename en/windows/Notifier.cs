@@ -128,6 +128,21 @@ sealed class Notifier : ApplicationContext {
         popup.StopCountdown();
         string thread=queue[0].Thread;
         if(thread.Length==0) {popup.SetReplyStatus("Test reply: «"+text+"». No message was sent.",false);return;}
+        if(settings.ReplyMode=="send") {
+            var pending=new PendingReply {Thread=thread,Text=text,Sent=true,Deadline=DateTime.MaxValue};pendingReply=pending;
+            var target=popup;
+            popup.SetReplyStatus("Sending message in the background…",true);
+            System.Threading.ThreadPool.QueueUserWorkItem(delegate {
+                bool accepted=false;try{accepted=QuickReply.Queue(thread,text);}catch(Exception e){Log("background-reply-error "+e.GetType().Name);}
+                target.Window.Dispatcher.BeginInvoke(new Action(delegate {
+                    if(pendingReply!=pending || popup!=target)return;
+                    pendingReply=null;
+                    if(accepted){Log("background-reply-queued");Acknowledge();}
+                    else {popup.Show();popup.SetReplyStatus("Sending was not confirmed. Open the task and check before retrying.",true);}
+                }));
+            });
+            return;
+        }
         try {
             string draft=QuickReply.Draft(thread);
             if(!String.IsNullOrWhiteSpace(draft)) {Open(thread);popup.SetReplyStatus("This task already has a draft. Review it before sending.",false);return;}

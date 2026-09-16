@@ -13,6 +13,9 @@ static class SelfTest {
     }
     public static void Run() {
         checks=0;
+        Check(QuickReply.QueueArguments("11111111-2222-4333-8444-555555555555",QuickReply.Texts[2])=="queue --thread 11111111-2222-4333-8444-555555555555 --message \""+QuickReply.Texts[2]+"\"","background reply targets exact task and quotes text");
+        bool invalidReply=false;try{QuickReply.QueueArguments("invalid",QuickReply.Texts[0]);}catch(ArgumentException){invalidReply=true;}Check(invalidReply,"background reply rejects invalid destination");
+        invalidReply=false;try{QuickReply.QueueArguments("11111111-2222-4333-8444-555555555555","\" --help");}catch(ArgumentException){invalidReply=true;}Check(invalidReply,"background reply rejects arbitrary command arguments");
         string root=Path.Combine(Path.GetTempPath(),"CodexNotifier-test-"+Guid.NewGuid());
         Directory.CreateDirectory(root);
         SessionWatcher w=null;

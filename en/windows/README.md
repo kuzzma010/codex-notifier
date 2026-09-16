@@ -1,5 +1,7 @@
 # Windows — English edition
 
+**Background quick replies:** Send immediately now uses `codex queue`, without showing the app or changing its draft. Requires a Codex CLI version with the `queue` command. Failure never opens the app or retries automatically. Insert for review still opens the editor. Disable automatic opening to open tasks only with the Open button.
+
 ## Build and run
 
 Requires Windows with .NET Framework 4.x and WPF. In PowerShell, open this folder and run:
@@ -19,7 +21,7 @@ Quit the Russian edition before starting the English edition. Both use the same 
 powershell -NoProfile -ExecutionPolicy Bypass -File .\verify.ps1
 ```
 
-Runs 24 core checks and 28 settings/UI checks. The UI checks briefly open test windows and use focus, so leave the keyboard and mouse idle until they finish. Results and English screenshots are written to `build/verification`.
+Runs 27 core checks and 28 settings/UI checks. The UI checks briefly open test windows and use focus, so leave the keyboard and mouse idle until they finish. Results and English screenshots are written to `build/verification`.
 
 Settings: `%LOCALAPPDATA%\CodexNotifier\settings.json`. Diagnostic events: `%LOCALAPPDATA%\CodexNotifier\events.log`. The app watches `%USERPROFILE%\.codex\sessions` and reads new log entries using filesystem notifications.
 

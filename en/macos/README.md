@@ -1,5 +1,7 @@
 # macOS — English edition
 
+**Background quick replies:** Send immediately now uses `codex queue`, without showing the app or changing its draft. Requires a Codex CLI version with the `queue` command. Failure never opens the app or retries automatically. Insert for review still opens the editor. Disable automatic opening to open tasks only with the Open button.
+
 Latest changes: notifications hide after 15 seconds while automatic task opening keeps its own timer. The expanded card has tighter spacing with unchanged text and button sizes. The application icon is included in the build.
 
 To update, quit the running edition, rebuild, and replace the previous app with the result from `build`. Existing settings are stored separately and retained. Recheck Accessibility permission after replacing the app if you use quick replies.

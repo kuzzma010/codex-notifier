@@ -90,8 +90,42 @@ final class ReplySender {
         return readResult == .success && matches
     }
     func cancel() { generation += 1; timer?.invalidate(); timer = nil }
+    private func sendInBackground(thread: String, text: String, status: @escaping (String) -> Void, submitted: @escaping () -> Void) {
+        let token = generation
+        guard UUID(uuidString: thread) != nil, ReplyData.texts.contains(text) else { return }
+        status("Отправляю сообщение в фоне…")
+        queue.async { [weak self] in
+            let home = FileManager.default.homeDirectoryForCurrentUser.path
+            var candidates = ["/Applications/Codex.app/Contents/Resources/codex", home + "/Applications/Codex.app/Contents/Resources/codex", home + "/.local/bin/codex", "/opt/homebrew/bin/codex", "/usr/local/bin/codex"]
+            if let app = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.openai.codex") {
+                candidates.insert(app.appendingPathComponent("Contents/Resources/codex").path, at: 0)
+            }
+            var accepted = false
+            if let executable = candidates.first(where: { FileManager.default.isExecutableFile(atPath: $0) }) {
+                let process = Process()
+                process.executableURL = URL(fileURLWithPath: executable)
+                process.arguments = ["queue", "--thread", thread, "--message", text]
+                process.standardOutput = FileHandle.nullDevice
+                process.standardError = FileHandle.nullDevice
+                do {
+                    try process.run()
+                    let timeout = DispatchWorkItem { if process.isRunning { process.terminate() } }
+                    DispatchQueue.global().asyncAfter(deadline: .now() + 20, execute: timeout)
+                    process.waitUntilExit(); timeout.cancel()
+                    accepted = process.terminationReason == .exit && process.terminationStatus == 0
+                } catch {}
+            }
+            let success = accepted
+            DispatchQueue.main.async {
+                guard let self = self, self.generation == token else { return }
+                if success { submitted() }
+                else { status("Отправка не подтверждена. Открой чат и проверь перед повтором.") }
+            }
+        }
+    }
     func start(thread: String, text: String, mode: String, status: @escaping (String) -> Void, submitted: @escaping () -> Void) {
         cancel()
+        if mode == "send" { sendInBackground(thread: thread, text: text, status: status, submitted: submitted); return }
         let token = generation
         guard let url = ReplyData.link(thread: thread, text: text),
               let appURL = NSWorkspace.shared.urlForApplication(toOpen: url) else {
